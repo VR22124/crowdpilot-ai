@@ -1,0 +1,13 @@
+{
+  "scores": {
+    "performance": 99,
+    "accessibility": 98,
+    "bestPractices": 96,
+    "seo": 82
+  },
+  "audits": {
+    "largestContentfulPaint": "1.4 s",
+    "totalBlockingTime": "70 ms",
+    "speedIndex": "1.4 s"
+  }
+}

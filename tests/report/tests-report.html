@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CrowdPilot Test Report</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; margin: 0; padding: 24px; background: #0b1220; color: #e2e8f0; }
+    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .card { border: 1px solid rgba(148,163,184,.3); border-radius: 14px; padding: 16px; background: rgba(15,23,42,.7); }
+    .bar { height: 10px; border-radius: 999px; background: #1e293b; overflow: hidden; }
+    .bar > i { display:block; height:100%; background: linear-gradient(90deg,#3A86FF,#7dd3fc); }
+    .ok { color:#4ade80; } .warn { color:#fbbf24; } .bad { color:#fb7185; }
+    h1,h2,h3 { margin: 0 0 10px; }
+    ul { margin: 8px 0 0 18px; }
+  </style>
+</head>
+<body>
+  <h1>IPL Stadium Digital Twin — Automated Testing Report</h1>
+  <p>Status: <strong class="ok">PASS</strong> · Pass 100%</p>
+
+  <section class="grid">
+    <div class="card"><h3>UI Tests</h3><p>16/16 passed</p><div class="bar"><i style="width:100%"></i></div></div>
+    <div class="card"><h3>Logic Tests</h3><p>4/4 passed</p><div class="bar"><i style="width:100%"></i></div></div>
+    <div class="card"><h3>Lighthouse</h3><p>Perf 99 · A11y 98</p></div>
+    <div class="card"><h3>Runtime Metrics</h3><p>FPS map 58.21 · Memory 19.65MB</p></div>
+  </section>
+
+  <section class="grid" style="margin-top:16px;">
+    <div class="card">
+      <h3>Warnings</h3>
+      <ul><li>None</li></ul>
+    </div>
+    <div class="card">
+      <h3>Failures</h3>
+      <ul><li>None</li></ul>
+    </div>
+    <div class="card">
+      <h3>Suggestions</h3>
+      <ul><li>No suggestions</li></ul>
+    </div>
+  </section>
+</body>
+</html>

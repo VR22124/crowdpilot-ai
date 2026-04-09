@@ -1,0 +1,47 @@
+{
+  "name": "crowdpilot-ai",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "test:ui": "start-server-and-test \"npm run dev -- --host 127.0.0.1 --port 4173\" http://127.0.0.1:4173 \"playwright test tests/ui tests/map tests/navigation tests/accessibility\"",
+    "test:logic": "vitest run --config tests/logic/vitest.config.ts",
+    "test:performance": "start-server-and-test \"npm run build && npm run preview -- --host 127.0.0.1 --port 4173\" http://127.0.0.1:4173 \"node tests/performance/run-performance-suite.mjs\"",
+    "test:report": "node tests/report/generate-report.mjs",
+    "test:full": "npm run test:logic && npm run test:ui && npm run test:performance && npm run test:report"
+  },
+  "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
+    "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.59.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^24.12.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "chrome-launcher": "^1.2.1",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "jsdom": "^26.1.0",
+    "lighthouse": "^12.8.2",
+    "playwright": "^1.59.1",
+    "puppeteer": "^24.40.0",
+    "start-server-and-test": "^2.1.5",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.58.0",
+    "vite": "^8.0.4",
+    "vitest": "^3.2.4"
+  }
+}

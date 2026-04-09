@@ -1,0 +1,102 @@
+{
+  "generatedAt": "2026-04-09T18:27:15.053Z",
+  "passPercentage": 100,
+  "totals": {
+    "tests": 20,
+    "passed": 20,
+    "failed": 0
+  },
+  "ui": {
+    "total": 16,
+    "passed": 16,
+    "failed": 0
+  },
+  "logic": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0
+  },
+  "performance": {
+    "thresholds": {
+      "fps": 18,
+      "memoryMb": 250,
+      "renderMs": 2500
+    },
+    "runtime": {
+      "renderTimeMs": 939,
+      "fpsMap": 58.21,
+      "fpsZoom": 55.43,
+      "fpsRoute": 53.69,
+      "memoryMb": 19.65,
+      "cpuTaskDurationSec": 0.001,
+      "webVitals": {
+        "fcp": 1016,
+        "ttfb": 7.800000011920929
+      }
+    },
+    "rendering": {
+      "mapVisible": true,
+      "svgVisible": true,
+      "mapWidth": 1384.15625,
+      "mapHeight": 675,
+      "svgWidth": 1382.15625,
+      "svgHeight": 675,
+      "aspectRatio": 2.047638888888889,
+      "legendVisible": true
+    },
+    "loadAndStress": {
+      "labelRenders": 100,
+      "routeRecalculations": 20,
+      "zoomSpamCycles": 12,
+      "tabSwitchSpam": 30,
+      "crashed": false
+    },
+    "assertions": {
+      "fpsMapPass": true,
+      "fpsZoomPass": true,
+      "fpsRoutePass": true,
+      "memoryPass": true,
+      "renderPass": true
+    },
+    "lighthouse": {
+      "scores": {
+        "performance": 99,
+        "accessibility": 98,
+        "bestPractices": 96,
+        "seo": 82
+      },
+      "audits": {
+        "largestContentfulPaint": "1.4 s",
+        "totalBlockingTime": "70 ms",
+        "speedIndex": "1.4 s"
+      }
+    }
+  },
+  "lighthouse": {
+    "scores": {
+      "performance": 99,
+      "accessibility": 98,
+      "bestPractices": 96,
+      "seo": 82
+    },
+    "audits": {
+      "largestContentfulPaint": "1.4 s",
+      "totalBlockingTime": "70 ms",
+      "speedIndex": "1.4 s"
+    }
+  },
+  "rendering": {
+    "mapVisible": true,
+    "svgVisible": true,
+    "mapWidth": 1384.15625,
+    "mapHeight": 675,
+    "svgWidth": 1382.15625,
+    "svgHeight": 675,
+    "aspectRatio": 2.047638888888889,
+    "legendVisible": true
+  },
+  "warnings": [],
+  "failures": [],
+  "suggestions": [],
+  "status": "PASS"
+}
