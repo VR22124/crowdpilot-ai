@@ -1,12 +1,16 @@
-import { useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useMemo, useRef, useState } from 'react'
 import { STADIUM_ZONES } from './data/stadium'
-import { AIOperationsBrain } from './components/AIOperationsBrain'
+import { AnalyticsDashboard } from './components/AnalyticsDashboard'
+import { DevMetricsPanel } from './components/DevMetricsPanel'
 import { MatchControlPanel } from './components/MatchControlPanel'
 import { RoutePlanner } from './components/RoutePlanner'
-import { StadiumMap } from './components/StadiumMap'
+import { BrandAttribution } from './components/BrandAttribution'
 import { useCrowdPilotSimulation } from './hooks/useCrowdPilotSimulation'
 import type { EmergencyMode, ZoneId } from './types'
 import './dashboard.css'
+
+const StadiumMap = lazy(() => import('./components/StadiumMap').then((mod) => ({ default: mod.StadiumMap })))
+const AIOperationsBrain = lazy(() => import('./components/AIOperationsBrain').then((mod) => ({ default: mod.AIOperationsBrain })))
 
 type DashboardTab = 'overview' | 'route' | 'control' | 'assist' | 'ai'
 
@@ -47,6 +51,13 @@ function App() {
     evacuationRoute,
     chatMessages,
     sendUserMessage,
+    routeUsageCount,
+    chatInteractions,
+    densityHistory,
+    popularGate,
+    liveSource,
+    perfMetrics,
+    showDevMetrics,
   } = useCrowdPilotSimulation()
 
   const navigationPicks = useMemo(() => {
@@ -87,7 +98,7 @@ function App() {
   const sendChat = () => {
     const input = chatInput.trim()
     if (!input) return
-    sendUserMessage(input)
+    void sendUserMessage(input)
     setChatInput('')
   }
 
@@ -112,16 +123,18 @@ function App() {
           </header>
 
           <div className="twin-map-stage" data-testid="map-stage">
-            <StadiumMap
-              metrics={metrics}
-              routePlan={routePlan}
-              phase={phase}
-              emergencyRoute={evacuationRoute}
-              queueLengths={queueLengths}
-              navigationPicks={navigationPicks}
-              emergencyMode={emergencyMode}
-              redistributionActive={redistributionActive}
-            />
+            <Suspense fallback={<div className="loading-shell">Loading map intelligence...</div>}>
+              <StadiumMap
+                metrics={metrics}
+                routePlan={routePlan}
+                phase={phase}
+                emergencyRoute={evacuationRoute}
+                queueLengths={queueLengths}
+                navigationPicks={navigationPicks}
+                emergencyMode={emergencyMode}
+                redistributionActive={redistributionActive}
+              />
+            </Suspense>
           </div>
 
           <div className="density-bottom-strip" aria-label="density bottom bar" data-testid="density-bottom-strip">
@@ -192,6 +205,24 @@ function App() {
                 <h3>AI Recommended Action</h3>
                 <p>{operationsInsight.recommendedAction}</p>
               </article>
+
+              <AnalyticsDashboard
+                routeUsageCount={routeUsageCount}
+                chatInteractions={chatInteractions}
+                popularGate={popularGate}
+                avgWaitTime={kpis.avgWaitTime}
+                densityHistory={densityHistory}
+              />
+
+              {showDevMetrics ? (
+                <DevMetricsPanel
+                  source={liveSource}
+                  fps={perfMetrics.fps}
+                  renderMs={perfMetrics.renderMs}
+                  routeComputeMs={perfMetrics.routeComputeMs}
+                  predictionLatencyMs={perfMetrics.predictionLatencyMs}
+                />
+              ) : null}
             </section>
           ) : null}
 
@@ -264,7 +295,7 @@ function App() {
                 <h3>AI Suggestions</h3>
                 <div className="quick-ask-list">
                   {[`Best gate`, `Best exit`, `Nearest restroom`, `Food suggestion`, `Fastest route`, ...suggestions].slice(0, 8).map((item) => (
-                    <button key={item} onClick={() => sendUserMessage(item)}>{item}</button>
+                    <button key={item} onClick={() => { void sendUserMessage(item) }}>{item}</button>
                   ))}
                 </div>
 
@@ -309,22 +340,25 @@ function App() {
 
           {activeTab === 'ai' ? (
             <section className="tab-grid ai-dash" data-testid="panel-ai">
-              <AIOperationsBrain
-                insight={operationsInsight}
-                phase={phase}
-                evacuationRoute={evacuationRoute}
-                navigationPicks={navigationPicks}
-                kpis={kpis}
-                routePlan={routePlan}
-                forecast={forecast}
-                emergencyMode={emergencyMode}
-                onEmergencyModeChange={setEmergencyMode}
-              />
+              <Suspense fallback={<div className="loading-shell">Loading operations AI...</div>}>
+                <AIOperationsBrain
+                  insight={operationsInsight}
+                  phase={phase}
+                  evacuationRoute={evacuationRoute}
+                  navigationPicks={navigationPicks}
+                  kpis={kpis}
+                  routePlan={routePlan}
+                  forecast={forecast}
+                  emergencyMode={emergencyMode}
+                  onEmergencyModeChange={setEmergencyMode}
+                />
+              </Suspense>
             </section>
           ) : null}
           </div>
         </section>
       </main>
+      <BrandAttribution />
     </div>
   )
 }

@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "stadium": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "analytics": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "stadium_logs": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}

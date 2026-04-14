@@ -1,0 +1,11 @@
+{
+  "model": "crowdpilot_micro_model",
+  "format": "tflite",
+  "input_shape": [
+    7
+  ],
+  "epochs": 12,
+  "final_loss": 0.00012682282249443233,
+  "final_val_loss": 0.00012629546108655632,
+  "size_bytes": 2008
+}

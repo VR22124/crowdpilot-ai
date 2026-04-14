@@ -26,7 +26,8 @@ It simulates live crowd behavior across stadium zones and uses three internal AI
 - React 19
 - TypeScript
 - Vite
-- No external APIs required
+- Firebase (Firestore, Realtime Database, Analytics, Performance, App Check, Cloud Functions)
+- Google Cloud (Cloud Run simulation service, Cloud Scheduler, Cloud Monitoring/Logging)
 
 ## Run Locally
 
@@ -61,4 +62,53 @@ npm run preview
 - `src/components`: Modular dashboard components
 - `src/hooks/useCrowdPilotSimulation.ts`: State-based simulation orchestration
 - `src/data/stadium.ts`: Stadium topology and zone definitions
+
+## Production Upgrade Layers
+
+- Realtime data layer:
+  - `src/realtime/liveCrowdStore.ts`
+  - `src/realtime/streams.ts` (`densityStream`, `queueStream`, `predictionStream`)
+  - `src/realtime/livePipeline.ts`
+- Intelligence layer:
+  - `src/engine/predictionEngine.ts`
+  - `src/ml/tinyLinearModel.ts` and `src/ml/crowdMlEngine.ts` (small on-device ML model)
+  - cloud prediction hook: `src/services/googleCloud.ts`
+- Security layer:
+  - `firebase.json` secure headers and CSP
+  - `src/services/security.ts` input sanitation and client-side rate limiting
+- Performance layer:
+  - lazy loading and code splitting
+  - `src/engine/perfMetrics.ts` FPS/render/latency tracking
+  - memoized selectors in `src/store/selectors.ts`
+
+## Firebase + GCP Setup
+
+1. Create Firebase project:
+   - https://console.firebase.google.com/
+2. Register web app and copy config values:
+   - Project settings -> Your apps -> Web app
+3. Enable products:
+   - Firestore: https://console.firebase.google.com/project/_/firestore
+   - Realtime DB: https://console.firebase.google.com/project/_/database
+   - Analytics: https://console.firebase.google.com/project/_/analytics
+   - App Check: https://console.firebase.google.com/project/_/appcheck
+   - Functions: https://console.firebase.google.com/project/_/functions
+4. Cloud Run service for simulation:
+   - https://console.cloud.google.com/run
+5. Cloud Scheduler for periodic updates:
+   - https://console.cloud.google.com/cloudscheduler
+6. Cloud Logging + Monitoring:
+   - https://console.cloud.google.com/logs
+   - https://console.cloud.google.com/monitoring
+
+## Environment Variables
+
+Create `.env` from `.env.example` and provide real values for all `VITE_FIREBASE_*` keys plus cloud URLs.
+
+## Deploy
+
+- Firebase Hosting:
+  - `firebase deploy --only hosting,firestore:rules,database,functions`
+- Cloud Run simulation:
+  - `gcloud run deploy crowdpilot-sim --source cloudrun --region us-central1 --allow-unauthenticated`
 # crowdpilot-ai
