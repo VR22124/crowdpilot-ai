@@ -27,8 +27,8 @@ export function HealthPage() {
   })
   const [geminiStatus, setGeminiStatus] = useState<HealthSignal>({
     label: 'Gemini API',
-    status: 'checking',
-    detail: 'Running model health check...',
+    status: appEnv.geminiApiKey ? 'checking' : 'offline',
+    detail: appEnv.geminiApiKey ? 'Running model health check...' : 'VITE_GEMINI_API_KEY is not configured.',
   })
   const [tfliteStatus, setTfliteStatus] = useState<HealthSignal>({
     label: 'Tiny Model Asset',
@@ -59,11 +59,6 @@ export function HealthPage() {
 
   useEffect(() => {
     if (!appEnv.geminiApiKey) {
-      setGeminiStatus({
-        label: 'Gemini API',
-        status: 'offline',
-        detail: 'VITE_GEMINI_API_KEY is not configured.',
-      })
       return
     }
 

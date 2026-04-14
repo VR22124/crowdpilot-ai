@@ -105,10 +105,27 @@ npm run preview
 
 Create `.env` from `.env.example` and provide real values for all `VITE_FIREBASE_*` keys plus cloud URLs.
 
+For Spark/free-tier Google service integration (without Functions deploy), configure:
+
+- `VITE_WORKSPACE_API_URL`
+- `VITE_WORKSPACE_API_TOKEN`
+
+and keep:
+
+- `VITE_ENABLE_CLOUD_FUNCTIONS=false`
+
+Apps Script backend template and setup steps are in `workspace-backend/README.md`.
+
 ## Deploy
 
 - Firebase Hosting:
   - `firebase deploy --only hosting,firestore:rules,database,functions`
 - Cloud Run simulation:
   - `gcloud run deploy crowdpilot-sim --source cloudrun --region us-central1 --allow-unauthenticated`
+
+Spark-safe deploy option:
+
+- Deploy Hosting only:
+  - `firebase deploy --only hosting --project <your_project_id>`
+- Use Apps Script web app backend from `workspace-backend/Code.gs`.
 # crowdpilot-ai

@@ -14,6 +14,14 @@ export interface AppEnv {
   tfliteModelUrl: string
   firebaseFunctionsRegion: string
   predictionFunctionName: string
+  sheetsExportFunctionName: string
+  simulationLogFunctionName: string
+  waitTimesExportFunctionName: string
+  driveSaveFunctionName: string
+  googleSheetsSpreadsheetId: string
+  googleDriveFolderId: string
+  workspaceApiUrl: string
+  workspaceApiToken: string
   predictionFunctionUrl: string
   cloudRunSimulationUrl: string
   enableCloudFunctions: boolean
@@ -48,6 +56,14 @@ export const appEnv: AppEnv = {
   tfliteModelUrl: readString(import.meta.env.VITE_TFLITE_MODEL_URL) || '/models/crowdpilot_micro_model.tflite',
   firebaseFunctionsRegion: readString(import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION) || 'us-central1',
   predictionFunctionName: readString(import.meta.env.VITE_PREDICTION_FUNCTION_NAME) || 'predictCrowdState',
+  sheetsExportFunctionName: readString(import.meta.env.VITE_SHEETS_EXPORT_FUNCTION_NAME) || 'exportToSheets',
+  simulationLogFunctionName: readString(import.meta.env.VITE_SIMULATION_LOG_FUNCTION_NAME) || 'logSimulation',
+  waitTimesExportFunctionName: readString(import.meta.env.VITE_WAIT_TIMES_EXPORT_FUNCTION_NAME) || 'exportWaitTimes',
+  driveSaveFunctionName: readString(import.meta.env.VITE_DRIVE_SAVE_FUNCTION_NAME) || 'saveSimulation',
+  googleSheetsSpreadsheetId: readString(import.meta.env.VITE_GOOGLE_SHEETS_SPREADSHEET_ID),
+  googleDriveFolderId: readString(import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID),
+  workspaceApiUrl: readString(import.meta.env.VITE_WORKSPACE_API_URL),
+  workspaceApiToken: readString(import.meta.env.VITE_WORKSPACE_API_TOKEN),
   predictionFunctionUrl: readString(import.meta.env.VITE_PREDICTION_FUNCTION_URL),
   cloudRunSimulationUrl: readString(import.meta.env.VITE_CLOUD_RUN_SIMULATION_URL),
   enableCloudFunctions: readBoolean(import.meta.env.VITE_ENABLE_CLOUD_FUNCTIONS, false),

@@ -27,3 +27,18 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Local Apps Script / deployment artifacts
+workspace-backend/.clasp_access_token.txt
+workspace-backend/.clasp_token_response.json
+workspace-backend/.deployment_response.json
+workspace-backend/.version_response.json
+workspace-backend/.workspace_api_token.local
+workspace-backend/.webapp_url.local
+workspace-backend/.clasp.json
+
+# Generated test artifacts
+tests/report/artifacts/*.json
+
+# Local Firebase hosting cache
+.firebase/hosting.*.cache

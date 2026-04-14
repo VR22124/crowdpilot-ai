@@ -191,7 +191,7 @@ export const StadiumMap: FC<StadiumMapProps> = ({
     }
 
     return resolveLabelCandidates(candidates, zoomLevel)
-  }, [activeRoute?.avoidedZones, facilityNodes, routePathD, visibleZoneIds, zoomLevel])
+  }, [activeRoute, facilityNodes, routePathD, visibleZoneIds, zoomLevel])
 
   const particleCount = phase === 'matchEnd' ? 48 : 28
   const phasePathIds =
@@ -758,7 +758,11 @@ function resolveLabelCandidates(candidates: LabelCandidate[], zoomLevel: ZoomLev
     })
   }
 
-  return placed.map(({ box: _box, ...label }) => label)
+  return placed.map((label) => {
+    const { box, ...rest } = label
+    void box
+    return rest
+  })
 }
 
 function smoothPath(points: Array<{ x: number; y: number }>): string {

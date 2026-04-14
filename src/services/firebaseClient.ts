@@ -36,6 +36,8 @@ let appCheck: AppCheck | null = null
 let authClient: Auth | null = null
 let remoteConfigClient: RemoteConfig | null = null
 
+const enableAnonymousAuth = import.meta.env.VITE_ENABLE_ANONYMOUS_AUTH === 'true'
+
 export async function initializeFirebaseServices(): Promise<void> {
   if (!firebaseApp || typeof window === 'undefined') return
 
@@ -57,7 +59,7 @@ export async function initializeFirebaseServices(): Promise<void> {
     })
   }
 
-  if (auth && !authClient) {
+  if (auth && !authClient && enableAnonymousAuth) {
     authClient = auth
     try {
       await signInAnonymously(authClient)

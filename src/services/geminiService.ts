@@ -6,6 +6,11 @@ export interface GeminiCrowdContext {
   fromLabel: string
 }
 
+export interface GeminiPromptOptions {
+  maxOutputTokens?: number
+  temperature?: number
+}
+
 const GEMINI_FALLBACK_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemma-3-1b-it']
 
 function getGeminiModelCandidates(): string[] {
@@ -14,18 +19,10 @@ function getGeminiModelCandidates(): string[] {
   return ordered.filter((value, index) => value && ordered.indexOf(value) === index)
 }
 
-export async function askGeminiForCrowdAdvice(context: GeminiCrowdContext): Promise<string | null> {
+export async function askGeminiWithPrompt(prompt: string, options: GeminiPromptOptions = {}): Promise<string | null> {
   if (!appEnv.geminiApiKey) {
     return null
   }
-
-  const prompt = [
-    'You are CrowdPilot AI for stadium operations.',
-    'Respond in under 2 sentences with practical navigation advice.',
-    `Current zone: ${context.fromLabel}.`,
-    `Live insights: ${context.quickInsights}.`,
-    `User question: ${context.question}`,
-  ].join(' ')
 
   const modelCandidates = getGeminiModelCandidates()
 
@@ -44,8 +41,8 @@ export async function askGeminiForCrowdAdvice(context: GeminiCrowdContext): Prom
             },
           ],
           generationConfig: {
-            maxOutputTokens: 140,
-            temperature: 0.35,
+            maxOutputTokens: options.maxOutputTokens ?? 220,
+            temperature: options.temperature ?? 0.35,
           },
         }),
       })
@@ -64,4 +61,19 @@ export async function askGeminiForCrowdAdvice(context: GeminiCrowdContext): Prom
   }
 
   return null
+}
+
+export async function askGeminiForCrowdAdvice(context: GeminiCrowdContext): Promise<string | null> {
+  const prompt = [
+    'You are CrowdPilot AI for stadium operations.',
+    'Respond in under 2 sentences with practical navigation advice.',
+    `Current zone: ${context.fromLabel}.`,
+    `Live insights: ${context.quickInsights}.`,
+    `User question: ${context.question}`,
+  ].join(' ')
+
+  return askGeminiWithPrompt(prompt, {
+    maxOutputTokens: 140,
+    temperature: 0.35,
+  })
 }

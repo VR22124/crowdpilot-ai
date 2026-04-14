@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   getQuickInsights,
 } from '../agents/attendeeCopilotAgent'
@@ -25,6 +26,20 @@ import { requestPredictionEngine } from '../services/googleCloud'
 import { initializeFirebaseServices, startPerformanceTrace, trackAnalyticsEvent } from '../services/firebaseClient'
 import { initializeWebPushMessaging } from '../services/firebaseMessaging'
 import { askGeminiForCrowdAdvice } from '../services/geminiService'
+import { explainCongestion, generateAiOpsSummary, generateStrategy } from '../services/aiService'
+import {
+  exportToSheets,
+  exportWaitTimes,
+  facilityLoadForecast,
+  type IntegrationResult,
+  logSimulation,
+  predictCrowdNext10Min,
+  predictExitRush,
+  saveSimulation,
+  staffDeploymentSuggestion,
+  suggestBestGate,
+} from '../services/googleService'
+import { persistDensityHistory, persistSimulationSnapshot } from '../services/firebaseService'
 import { createRateLimiter, sanitizeInput } from '../services/security'
 import { startLivePipeline } from '../realtime/livePipeline'
 import { useLiveCrowdStore } from '../realtime/liveCrowdStore'
@@ -48,6 +63,19 @@ export function useCrowdPilotSimulation() {
   const [selectedTo, setSelectedTo] = useState<ZoneId>('seatingB')
   const [routePlan, setRoutePlan] = useState<RoutePlan | null>(null)
   const [plannedRoute, setPlannedRoute] = useState<{ from: ZoneId; to: ZoneId } | null>(null)
+  const [aiOpsSummary, setAiOpsSummary] = useState('Generating AI ops summary...')
+  const [congestionExplanation, setCongestionExplanation] = useState('Use "Explain congestion" to generate a cause analysis.')
+  const [strategyRecommendation, setStrategyRecommendation] = useState('Use "Generate strategy" for a tactical recommendation.')
+  const [staffRecommendation, setStaffRecommendation] = useState('Staff deployment suggestion will appear after prediction runs.')
+  const [smartAlert, setSmartAlert] = useState('Smart alert generator is observing live changes.')
+  const [predictionTimeline, setPredictionTimeline] = useState<number[]>([])
+  const [exportStatus, setExportStatus] = useState('No export operation has been started yet.')
+  const [isAiBusy, setIsAiBusy] = useState(false)
+
+  function setIntegrationStatus(result: IntegrationResult) {
+    const source = result.source ? ` [source: ${result.source}]` : ''
+    setExportStatus(result.link ? `${result.message}${source} ${result.link}` : `${result.message}${source}`)
+  }
 
   const liveSnapshot = useLiveCrowdStore()
   const [now, setNow] = useState(() => Date.now())
@@ -66,7 +94,7 @@ export function useCrowdPilotSimulation() {
       id: 'welcome',
       role: 'assistant',
       text: 'Welcome to CrowdPilot AI. I can recommend the best gate, route, food timing, restrooms, and exits using live stadium intelligence.',
-      createdAt: Date.now(),
+      createdAt: 0,
     },
   ])
 
@@ -128,7 +156,20 @@ export function useCrowdPilotSimulation() {
 
     const nextSuggestions = generated.slice(0, 3).map((item) => item.message.replace(' — ', ': '))
     setSuggestions(nextSuggestions)
+    if (generated[0]) {
+      setSmartAlert(`Smart alert: ${generated[0].message}`)
+    }
   }, [metrics, phase, queueLengths, plannedRoute])
+
+  useEffect(() => {
+    if (densityHistory.length > 0 && densityHistory.length % 6 === 0) {
+      void persistDensityHistory({
+        phase,
+        densityHistory: densityHistory.slice(-24),
+        timestamp: Date.now(),
+      })
+    }
+  }, [densityHistory, phase])
 
   const waitTimes = useMemo(() => calculateWaitTimes(metrics, queueLengths), [metrics, queueLengths])
   const overall = useMemo(() => getOverallCrowdStatus(metrics), [metrics])
@@ -225,7 +266,149 @@ export function useCrowdPilotSimulation() {
       setLastPredictionLatencyMs(prediction.latencyMs)
       setSuggestions((prev) => [prediction.reason, ...prev].slice(0, 6))
     }
+
+    const nextWindow = await predictCrowdNext10Min({
+      phase,
+      densityHistory,
+      metrics,
+    })
+    setPredictionTimeline(nextWindow.values)
+
+    const [bestGate, exitRush, facilityLoad, staff] = await Promise.all([
+      suggestBestGate({ metrics }),
+      predictExitRush({ phase, metrics }),
+      facilityLoadForecast({ metrics, queues: queueLengths }),
+      staffDeploymentSuggestion({ phase, metrics, queues: queueLengths }),
+    ])
+
+    setStaffRecommendation(`${staff.recommendation} (${Math.round(staff.confidence * 100)}% confidence)`)
+    setSmartAlert(
+      `Ops: Gate ${bestGate.gate} | Exit rush ${exitRush.level.toUpperCase()} | Facility load ${facilityLoad.busiestFacility}`,
+    )
+
+    void persistSimulationSnapshot({
+      phase,
+      metrics,
+      queues: queueLengths,
+      alerts,
+      timestamp: Date.now(),
+    })
   }
+
+  const regenerateAiOpsSummary = useCallback(async () => {
+    setIsAiBusy(true)
+    const summary = await generateAiOpsSummary({
+      phase,
+      from: selectedFrom,
+      to: selectedTo,
+      metrics,
+      queues: queueLengths,
+    })
+    if (summary) {
+      setAiOpsSummary(summary)
+      trackAnalyticsEvent('ai_ops_summary_generated', { phase })
+    }
+    setIsAiBusy(false)
+  }, [metrics, phase, queueLengths, selectedFrom, selectedTo])
+
+  async function runCongestionExplanation() {
+    setIsAiBusy(true)
+    const explanation = await explainCongestion({
+      phase,
+      from: selectedFrom,
+      to: selectedTo,
+      metrics,
+      queues: queueLengths,
+    })
+    if (explanation) {
+      setCongestionExplanation(explanation)
+      trackAnalyticsEvent('ai_congestion_explained', { phase })
+    }
+    setIsAiBusy(false)
+  }
+
+  async function runStrategyGeneration() {
+    setIsAiBusy(true)
+    const strategy = await generateStrategy({
+      phase,
+      from: selectedFrom,
+      to: selectedTo,
+      metrics,
+      queues: queueLengths,
+    })
+    if (strategy) {
+      setStrategyRecommendation(strategy)
+      trackAnalyticsEvent('ai_strategy_generated', { phase })
+    }
+    setIsAiBusy(false)
+  }
+
+  async function runExportToSheets() {
+    const result = await exportToSheets({
+      phase,
+      densityHistory,
+      queueLengths,
+      notes: aiOpsSummary,
+    })
+    setIntegrationStatus(result)
+  }
+
+  async function runSimulationLog() {
+    const result = await logSimulation({
+      phase,
+      metrics,
+      queues: queueLengths,
+      alerts: alerts.slice(0, 6).map((item) => item.message),
+    })
+    setIntegrationStatus(result)
+  }
+
+  async function runWaitTimesExport() {
+    const result = await exportWaitTimes({
+      phase,
+      waitTimes: waitTimes.slice(0, 8).map((item) => ({ label: item.label, minutes: item.minutes })),
+    })
+    setIntegrationStatus(result)
+  }
+
+  async function runSaveSimulation() {
+    const result = await saveSimulation({
+      phase,
+      summary: aiOpsSummary,
+      densityHistory,
+      timestamp: Date.now(),
+    })
+    setIntegrationStatus(result)
+  }
+
+  function downloadAiSummary() {
+    const payload = [
+      'CrowdPilot AI Summary',
+      `Generated: ${new Date().toISOString()}`,
+      `Phase: ${phase}`,
+      '',
+      aiOpsSummary,
+      '',
+      'Congestion Explanation',
+      congestionExplanation,
+      '',
+      'Strategy Recommendation',
+      strategyRecommendation,
+    ].join('\n')
+
+    const blob = new Blob([payload], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `crowdpilot-ai-summary-${Date.now()}.txt`
+    anchor.click()
+    URL.revokeObjectURL(url)
+    setExportStatus('AI summary downloaded successfully.')
+  }
+
+  useEffect(() => {
+    void regenerateAiOpsSummary()
+  }, [regenerateAiOpsSummary])
 
   async function sendUserMessage(input: string) {
     const cleaned = sanitizeInput(input)
@@ -326,6 +509,22 @@ export function useCrowdPilotSimulation() {
       routeComputeMs: perf.routeComputeMs,
       predictionLatencyMs: perf.predictionLatencyMs || lastPredictionLatencyMs,
     },
+    aiOpsSummary,
+    congestionExplanation,
+    strategyRecommendation,
+    staffRecommendation,
+    smartAlert,
+    predictionTimeline,
+    exportStatus,
+    isAiBusy,
+    regenerateAiOpsSummary,
+    runCongestionExplanation,
+    runStrategyGeneration,
+    runExportToSheets,
+    runSimulationLog,
+    runWaitTimesExport,
+    runSaveSimulation,
+    downloadAiSummary,
     showDevMetrics: appEnv.enableDevMetricsPanel,
   }
 }

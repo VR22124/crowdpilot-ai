@@ -3,6 +3,7 @@ import { STADIUM_ZONES } from './data/stadium'
 import { AnalyticsDashboard } from './components/AnalyticsDashboard'
 import { DevMetricsPanel } from './components/DevMetricsPanel'
 import { MatchControlPanel } from './components/MatchControlPanel'
+import { GoogleOpsPanel } from './components/GoogleOpsPanel'
 import { RoutePlanner } from './components/RoutePlanner'
 import { BrandAttribution } from './components/BrandAttribution'
 import { useCrowdPilotSimulation } from './hooks/useCrowdPilotSimulation'
@@ -57,6 +58,22 @@ function App() {
     popularGate,
     liveSource,
     perfMetrics,
+    aiOpsSummary,
+    congestionExplanation,
+    strategyRecommendation,
+    staffRecommendation,
+    smartAlert,
+    predictionTimeline,
+    exportStatus,
+    isAiBusy,
+    regenerateAiOpsSummary,
+    runCongestionExplanation,
+    runStrategyGeneration,
+    runExportToSheets,
+    runSimulationLog,
+    runWaitTimesExport,
+    runSaveSimulation,
+    downloadAiSummary,
     showDevMetrics,
   } = useCrowdPilotSimulation()
 
@@ -212,6 +229,25 @@ function App() {
                 popularGate={popularGate}
                 avgWaitTime={kpis.avgWaitTime}
                 densityHistory={densityHistory}
+              />
+
+              <GoogleOpsPanel
+                aiOpsSummary={aiOpsSummary}
+                congestionExplanation={congestionExplanation}
+                strategyRecommendation={strategyRecommendation}
+                staffRecommendation={staffRecommendation}
+                smartAlert={smartAlert}
+                predictionTimeline={predictionTimeline}
+                exportStatus={exportStatus}
+                isAiBusy={isAiBusy}
+                onRegenerateSummary={regenerateAiOpsSummary}
+                onExplainCongestion={runCongestionExplanation}
+                onGenerateStrategy={runStrategyGeneration}
+                onExportToSheets={runExportToSheets}
+                onLogSimulation={runSimulationLog}
+                onExportWaitTimes={runWaitTimesExport}
+                onSaveSimulation={runSaveSimulation}
+                onDownloadSummary={downloadAiSummary}
               />
 
               {showDevMetrics ? (

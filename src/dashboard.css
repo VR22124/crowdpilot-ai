@@ -1237,7 +1237,9 @@ button:hover {
 
 .expanded-tab-content {
   height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
 }
 
 .tab-slide {
@@ -1245,7 +1247,7 @@ button:hover {
 }
 
 .tab-grid {
-  height: 100%;
+  min-height: 100%;
   display: grid;
   gap: 16px;
 }
@@ -1348,6 +1350,99 @@ button:hover {
 
 .analytics-card {
   grid-column: 1 / -1;
+}
+
+.google-ops-panel {
+  grid-column: 1 / -1;
+  padding: 0.95rem;
+}
+
+.google-ops-panel header h3 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 0.92rem;
+}
+
+.google-ops-panel header p {
+  margin: 0.35rem 0 0;
+  color: #94a3b8;
+  font-size: 0.77rem;
+}
+
+.google-ops-grid {
+  margin-top: 0.7rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.google-ops-grid section {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.45);
+  padding: 0.55rem;
+}
+
+.google-ops-grid h4 {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 0.78rem;
+}
+
+.google-ops-grid p {
+  margin: 0.34rem 0 0;
+  color: #cbd5e1;
+  font-size: 0.74rem;
+  line-height: 1.34;
+  overflow-wrap: anywhere;
+}
+
+.google-ops-grid section:last-child {
+  display: grid;
+  align-content: start;
+  gap: 0.28rem;
+}
+
+.google-ops-status {
+  margin-top: 0.5rem;
+  min-height: 2.2rem;
+  padding: 0.42rem 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.45);
+  overflow-wrap: anywhere;
+}
+
+.google-ops-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.38rem;
+  flex-wrap: wrap;
+}
+
+.google-ops-actions button {
+  background: rgba(30, 64, 175, 0.3);
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  font-size: 0.72rem;
+  padding: 0.3rem 0.48rem;
+}
+
+.timeline-bars {
+  margin-top: 0.45rem;
+  height: 88px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.35);
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  padding: 0.3rem;
+}
+
+.timeline-bars i {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, #22d3ee, #3A86FF);
 }
 
 .analytics-grid {
@@ -1617,6 +1712,10 @@ button:hover {
 
   .analytics-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .google-ops-grid {
+    grid-template-columns: 1fr;
   }
 
   .route-dash,
