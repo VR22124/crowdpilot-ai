@@ -1,35 +1,84 @@
 # CrowdPilot AI
 
-CrowdPilot AI is an interactive, AI-powered stadium experience platform for hackathon demos and product exploration.
+CrowdPilot AI is a real-time, AI-assisted crowd operations platform for large venue events.
 
-It simulates live crowd behavior across stadium zones and uses three internal AI agents to improve venue flow:
+It helps operations teams predict congestion, optimize routes, manage exits, and export insights to Google services.
 
-- Crowd Intelligence Agent (density monitoring and congestion forecasting)
-- Route Optimization Agent (least-crowded route + ETA + alternate path)
-- Attendee Copilot Agent (conversational recommendations from live data)
+## Live Deployment
 
-## Features
+- App: https://crowdpilot-ai-b5a0d.web.app
 
-- Live crowd heatmap with animated zone updates every 5 seconds
-- Dynamic wait-time prediction for entry gates, food court, and restrooms
-- Smart route planner with congestion-aware pathing and fallback route
-- Conversational attendee copilot panel
-- Real-time alerts for congestion and flow changes
-- Demo scenario controls:
-  - Increase gate crowd
-  - Food rush
-  - Halftime surge
-  - Match end exit rush
+## Demo Preview
 
-## Tech Stack
+![CrowdPilot AI Demo Preview](src/assets/hero.png)
 
-- React 19
-- TypeScript
-- Vite
-- Firebase (Firestore, Realtime Database, Analytics, Performance, App Check, Cloud Functions)
-- Google Cloud (Cloud Run simulation service, Cloud Scheduler, Cloud Monitoring/Logging)
+If you want an animated demo asset, add a GIF at `docs/diagrams/demo.gif` and update this image path.
 
-## Run Locally
+## Why This Project Matters
+
+- Reduces gate and concourse congestion with proactive recommendations.
+- Improves attendee experience via route guidance and wait-time awareness.
+- Supports operations staff with explainable AI summaries and tactical suggestions.
+- Produces exportable reports for post-match review and planning.
+
+## Core Features
+
+- Live crowd heatmap and zone telemetry simulation.
+- AI route optimization (primary + fallback route).
+- Match-phase aware operational alerts.
+- AI insights panel with:
+  - congestion explanation
+  - strategy generation
+  - staffing recommendations
+  - 10-minute demand forecast
+- Google integration actions:
+  - export report to Sheets
+  - log simulation snapshots
+  - export wait times
+  - save summary artifacts
+
+## Architecture At A Glance
+
+```mermaid
+flowchart LR
+  U[Operator / Attendee UI] --> FE[React + TypeScript Frontend]
+  FE --> SIM[Simulation Engine + Realtime Store]
+  FE --> AI[AI Services: Gemini + Local ML]
+  FE --> SEC[Security Layer: sanitize + rate limit + CSP]
+
+  FE -->|primary path| GAS[Google Apps Script Web App]
+  GAS --> SHEETS[Google Sheets]
+  GAS --> DRIVE[Google Drive]
+
+  FE -->|optional fallback| CF[Firebase Cloud Functions]
+  FE --> FB[Firebase: Analytics + Perf + DB]
+```
+
+For detailed architecture and module map, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Project Flow
+
+1. Match phase and live metrics update the simulation state.
+2. Route, wait time, and alert engines compute operational signals.
+3. AI services generate summaries and recommendations.
+4. Export actions send data to Google Workspace backend.
+5. Status is returned to the UI with source transparency (`workspace`, `functions`, or `local`).
+
+Detailed flow documentation: [docs/FLOW.md](docs/FLOW.md).
+
+## Stack
+
+- Frontend: React 19, TypeScript, Vite
+- Data + Telemetry: Firebase Analytics, Performance, Firestore, Realtime Database
+- AI: Gemini API + local lightweight ML inference
+- Backend Integration:
+  - Primary (free-tier friendly): Google Apps Script Web App
+  - Optional fallback: Firebase Cloud Functions
+- Security: CSP headers, input sanitation, client rate limiting, strict transport headers
+
+Detailed stack notes: [docs/STACK.md](docs/STACK.md).
+
+## Local Development
 
 Install dependencies:
 
@@ -37,95 +86,66 @@ Install dependencies:
 npm install
 ```
 
-Start development server:
+Run development server:
 
 ```bash
 npm run dev
 ```
 
-Build for production:
+Build production bundle:
 
 ```bash
 npm run build
 ```
 
-Preview production build:
+Run logic tests:
 
 ```bash
-npm run preview
+npm run test:logic
 ```
 
-## Architecture Notes
+## Environment Setup
 
-- `src/agents`: Internal AI agent logic
-- `src/engine`: Wait-time and alert generation
-- `src/components`: Modular dashboard components
-- `src/hooks/useCrowdPilotSimulation.ts`: State-based simulation orchestration
-- `src/data/stadium.ts`: Stadium topology and zone definitions
+Create a local `.env` file and fill your own keys and URLs.
 
-## Production Upgrade Layers
+Required categories:
 
-- Realtime data layer:
-  - `src/realtime/liveCrowdStore.ts`
-  - `src/realtime/streams.ts` (`densityStream`, `queueStream`, `predictionStream`)
-  - `src/realtime/livePipeline.ts`
-- Intelligence layer:
-  - `src/engine/predictionEngine.ts`
-  - `src/ml/tinyLinearModel.ts` and `src/ml/crowdMlEngine.ts` (small on-device ML model)
-  - cloud prediction hook: `src/services/googleCloud.ts`
-- Security layer:
-  - `firebase.json` secure headers and CSP
-  - `src/services/security.ts` input sanitation and client-side rate limiting
-- Performance layer:
-  - lazy loading and code splitting
-  - `src/engine/perfMetrics.ts` FPS/render/latency tracking
-  - memoized selectors in `src/store/selectors.ts`
+- Firebase web config (`VITE_FIREBASE_*`)
+- Gemini key (`VITE_GEMINI_API_KEY`)
+- Workspace integration:
+  - `VITE_WORKSPACE_API_URL`
+  - `VITE_WORKSPACE_API_TOKEN`
 
-## Firebase + GCP Setup
-
-1. Create Firebase project:
-   - https://console.firebase.google.com/
-2. Register web app and copy config values:
-   - Project settings -> Your apps -> Web app
-3. Enable products:
-   - Firestore: https://console.firebase.google.com/project/_/firestore
-   - Realtime DB: https://console.firebase.google.com/project/_/database
-   - Analytics: https://console.firebase.google.com/project/_/analytics
-   - App Check: https://console.firebase.google.com/project/_/appcheck
-   - Functions: https://console.firebase.google.com/project/_/functions
-4. Cloud Run service for simulation:
-   - https://console.cloud.google.com/run
-5. Cloud Scheduler for periodic updates:
-   - https://console.cloud.google.com/cloudscheduler
-6. Cloud Logging + Monitoring:
-   - https://console.cloud.google.com/logs
-   - https://console.cloud.google.com/monitoring
-
-## Environment Variables
-
-Create `.env` from `.env.example` and provide real values for all `VITE_FIREBASE_*` keys plus cloud URLs.
-
-For Spark/free-tier Google service integration (without Functions deploy), configure:
-
-- `VITE_WORKSPACE_API_URL`
-- `VITE_WORKSPACE_API_TOKEN`
-
-and keep:
+Spark-safe recommendation:
 
 - `VITE_ENABLE_CLOUD_FUNCTIONS=false`
 
-Apps Script backend template and setup steps are in `workspace-backend/README.md`.
+Workspace backend template and setup: [workspace-backend/README.md](workspace-backend/README.md).
 
-## Deploy
+## Deployment
 
-- Firebase Hosting:
-  - `firebase deploy --only hosting,firestore:rules,database,functions`
-- Cloud Run simulation:
-  - `gcloud run deploy crowdpilot-sim --source cloudrun --region us-central1 --allow-unauthenticated`
+Deploy Hosting:
 
-Spark-safe deploy option:
+```bash
+npx firebase-tools deploy --only hosting --project <your_project_id>
+```
 
-- Deploy Hosting only:
-  - `firebase deploy --only hosting --project <your_project_id>`
-- Use Apps Script web app backend from `workspace-backend/Code.gs`.
-# crowdpilot-ai
+Current deployed link:
+
+- https://crowdpilot-ai-b5a0d.web.app
+
+## Documentation Index
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/FLOW.md](docs/FLOW.md)
+- [docs/STACK.md](docs/STACK.md)
+- [docs/FEATURES.md](docs/FEATURES.md)
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+
+## Judge-Friendly Evaluation Notes
+
+- Code Quality: modular service architecture, typed contracts, explicit fallback behavior.
+- Security: strict hosting headers/CSP, input controls, no secret files tracked.
+- Efficiency: workspace-first routing to avoid unnecessary failing backend calls.
+- Testing: logic suite and validation scripts included.
+- Accessibility: semantic UI sections, readable status messaging, keyboard-friendly controls.

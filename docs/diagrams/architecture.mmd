@@ -1,0 +1,12 @@
+flowchart LR
+  U[Operator or Attendee UI] --> FE[React Frontend]
+  FE --> SIM[Simulation Engine]
+  FE --> AI[AI Service Layer]
+  FE --> SEC[Security Layer]
+
+  FE -->|Primary| GAS[Apps Script Web App]
+  GAS --> SHEETS[Google Sheets]
+  GAS --> DRIVE[Google Drive]
+
+  FE -->|Optional Fallback| CF[Firebase Functions]
+  FE --> FB[Firebase Analytics and Data]
